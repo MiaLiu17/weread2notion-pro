@@ -14,12 +14,12 @@ jobs:
     name: Sync
     runs-on: ubuntu-latest
     env:
+      # 核心密钥
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       NOTION_PAGE: ${{ secrets.NOTION_PAGE }}
       WEREAD_COOKIE: ${{ secrets.WEREAD_COOKIE }}
-      # 强制指定年份为 2025，确保能抓到已有数据
-      YEAR: "2025" 
-      # 数据库名称写死，防止变量读取失败
+      
+      # 数据库名称配置 (直接写死，防止变量读取失败)
       BOOK_DATABASE_NAME: "书架"
       AUTHOR_DATABASE_NAME: "作者"
       CATEGORY_DATABASE_NAME: "分类"
@@ -30,6 +30,10 @@ jobs:
       WEEK_DATABASE_NAME: "周"
       MONTH_DATABASE_NAME: "月"
       DAY_DATABASE_NAME: "日"
+      
+      # 关键参数：强制同步 2025 年数据，避免 2026 空数据导致静默退出
+      YEAR: "2025"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,9 +46,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          # 确保安装了所有必须的依赖
           pip install -r requirements.txt
+          # 额外安装 current directory 到 path 以解决 ModuleNotFoundError
+          pip install -e . || echo "Not a package, skip install"
 
-      - name: read time sync (Debug Mode)
+      - name: read time sync (Direct Execution)
         run: |
-          # 如果 read_time 没反应，尝试直接调用模块并打印调试信息
-          python3 -m weread2notionpro --debug
+          # 核心修复：直接运行 main.py 脚本
+          # 设置 PYTHONPATH 为当前目录，解决 "No module named book" 报错
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          python main.py
