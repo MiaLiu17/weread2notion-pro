@@ -3,10 +3,12 @@ name: weread note sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */2 * * *'  # 每 2 小时执行一次
+    - cron: '0 */2 * * *'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   sync:
     name: Sync
@@ -15,36 +17,46 @@ jobs:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       NOTION_PAGE: ${{ secrets.NOTION_PAGE }}
       WEREAD_COOKIE: ${{ secrets.WEREAD_COOKIE }}
-      CC_URL: ${{ secrets.CC_URL }}
-      CC_ID: ${{ secrets.CC_ID }}
-      CC_PASSWORD: ${{ secrets.CC_PASSWORD }}
-      BOOK_DATABASE_NAME: ${{ vars.BOOK_DATABASE_NAME }}
-      AUTHOR_DATABASE_NAME: ${{ vars.AUTHOR_DATABASE_NAME }}
-      CATEGORY_DATABASE_NAME: ${{ vars.CATEGORY_DATABASE_NAME }}
-      BOOKMARK_DATABASE_NAME: ${{ vars.BOOKMARK_DATABASE_NAME }}
-      REVIEW_DATABASE_NAME: ${{ vars.REVIEW_DATABASE_NAME }}
-      CHAPTER_DATABASE_NAME: ${{ vars.CHAPTER_DATABASE_NAME }}
-      YEAR_DATABASE_NAME: ${{ vars.YEAR_DATABASE_NAME }}
-      WEEK_DATABASE_NAME: ${{ vars.WEEK_DATABASE_NAME }}
-      MONTH_DATABASE_NAME: ${{ vars.MONTH_DATABASE_NAME }}
-      DAY_DATABASE_NAME: ${{ vars.DAY_DATABASE_NAME }}
-      REF: ${{ github.ref }}
-      REPOSITORY: ${{ github.repository }}
+      # 直接写死数据库名称，解决 vars 为空的问题
+      BOOK_DATABASE_NAME: "书架"
+      AUTHOR_DATABASE_NAME: "作者"
+      CATEGORY_DATABASE_NAME: "分类"
+      BOOKMARK_DATABASE_NAME: "划线"
+      REVIEW_DATABASE_NAME: "笔记"
+      CHAPTER_DATABASE_NAME: "章节"
+      YEAR_DATABASE_NAME: "年"
+      WEEK_DATABASE_NAME: "周"
+      MONTH_DATABASE_NAME: "月"
+      DAY_DATABASE_NAME: "日"
+      # 强制同步 2025 年，防止 2026 年数据为空导致跳过
+      YEAR: "2025"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          # 核心修复：安装当前目录，注册快捷命令
+          pip install .
+
       - name: weread book sync
         run: |
+          # 核心修复：设置 Python 搜索路径
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           book
+        env:
+          YEAR: "2025"
+
       - name: weread sync
         run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           weread
-      
+        env:
+          YEAR: "2025"
