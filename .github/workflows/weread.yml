@@ -48,15 +48,12 @@ jobs:
 
       - name: weread book sync
         run: |
-          # 核心修复：设置 Python 搜索路径
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          book
-        env:
-          YEAR: "2025"
+          # 暂时先不运行 book 同步，看看 weread 同步笔记能不能成功
+          # book 
+          echo "Skipping book sync to test note sync"
 
       - name: weread sync
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
           weread
-        env:
-          YEAR: "2025"
