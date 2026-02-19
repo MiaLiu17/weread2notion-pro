@@ -54,4 +54,7 @@ jobs:
       # 删除了 heatmap、rename 和 git push 步骤，直接运行同步
       - name: read time sync
         run: |
-          read_time
+          - name: read time sync
+        run: |
+          # 使用 python 模块模式运行，并开启详细日志
+          python3 -m weread2notionpro --debug
