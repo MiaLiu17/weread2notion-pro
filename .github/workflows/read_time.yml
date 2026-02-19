@@ -42,14 +42,31 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          # 将当前目录以可编辑模式安装，确保所有路径被注册
-          pip install -e .
 
-      - name: read time sync (Final Fix)
+      - name: read time sync (Final Strike)
         run: |
-          # 1. 进入代码所在的子文件夹
-          # 2. 将当前根目录加入 PYTHONPATH，这样 python 就能识别 weread2notionpro 包
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          # 1. 核心修复：进入代码所在的文件夹
+          cd weread2notionpro
           
-          # 运行方式 A: 使用安装后的入口命令 (最推荐)
-          weread2notionpro || python3 -m weread2notionpro
+          # 2. 告诉 Python 就在当前文件夹找模块
+          export PYTHONPATH=$PYTHONPATH:.
+          
+          # 3. 直接运行脚本，不再使用 -m 模式或快捷命令
+          # 经过分析，main.py 应该在 weread2notionpro 文件夹内
+          python3 __main__.py
+        env:
+          # 确保环境变量在此步骤依然有效
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PAGE: ${{ secrets.NOTION_PAGE }}
+          WEREAD_COOKIE: ${{ secrets.WEREAD_COOKIE }}
+          BOOK_DATABASE_NAME: "书架"
+          AUTHOR_DATABASE_NAME: "作者"
+          CATEGORY_DATABASE_NAME: "分类"
+          BOOKMARK_DATABASE_NAME: "划线"
+          REVIEW_DATABASE_NAME: "笔记"
+          CHAPTER_DATABASE_NAME: "章节"
+          YEAR_DATABASE_NAME: "年"
+          WEEK_DATABASE_NAME: "周"
+          MONTH_DATABASE_NAME: "月"
+          DAY_DATABASE_NAME: "日"
+          YEAR: "2025"
