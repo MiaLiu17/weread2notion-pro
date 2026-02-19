@@ -33,7 +33,6 @@ jobs:
       DAY_DATABASE_NAME: "日"
       REF: ${{ github.ref }}
       REPOSITORY: ${{ github.repository }}
-      YEAR: ${{ vars.YEAR }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
