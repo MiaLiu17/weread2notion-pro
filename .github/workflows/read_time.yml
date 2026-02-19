@@ -17,10 +17,9 @@ jobs:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       NOTION_PAGE: ${{ secrets.NOTION_PAGE }}
       WEREAD_COOKIE: ${{ secrets.WEREAD_COOKIE }}
-      CC_URL: ${{ secrets.CC_URL }}
-      CC_ID: ${{ secrets.CC_ID }}
-      CC_PASSWORD: ${{ secrets.CC_PASSWORD }}
-      HEATMAP_BLOCK_ID: ${{ secrets.HEATMAP_BLOCK_ID }}
+      # 强制指定年份为 2025，确保能抓到已有数据
+      YEAR: "2025" 
+      # 数据库名称写死，防止变量读取失败
       BOOK_DATABASE_NAME: "书架"
       AUTHOR_DATABASE_NAME: "作者"
       CATEGORY_DATABASE_NAME: "分类"
@@ -31,8 +30,6 @@ jobs:
       WEEK_DATABASE_NAME: "周"
       MONTH_DATABASE_NAME: "月"
       DAY_DATABASE_NAME: "日"
-      REF: ${{ github.ref }}
-      REPOSITORY: ${{ github.repository }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,14 +44,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set default year if not provided
-        run: echo "YEAR=$(date +"%Y")" >> $GITHUB_ENV
-        if: env.YEAR == ''
-
-      # 删除了 heatmap、rename 和 git push 步骤，直接运行同步
-      - name: read time sync
+      - name: read time sync (Debug Mode)
         run: |
-          - name: read time sync
-        run: |
-          # 使用 python 模块模式运行，并开启详细日志
+          # 如果 read_time 没反应，尝试直接调用模块并打印调试信息
           python3 -m weread2notionpro --debug
